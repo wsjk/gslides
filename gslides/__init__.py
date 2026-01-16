@@ -50,3 +50,4 @@ from .frame import Frame  # noqa
 from .presentation import Presentation  # noqa
 from .spreadsheet import Spreadsheet  # noqa
 from .table import Table  # noqa
+from .image import Image  # noqa
