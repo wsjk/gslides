@@ -41,6 +41,9 @@ class Creds:
         logger.info("Building slides connection")
         self.sld_srvc = build("slides", "v1", credentials=credentials)
         logger.info("Built slides connection")
+        logger.info("Building drive connection")
+        self.drv_srvc = build("drive", "v3", credentials=credentials)
+        logger.info("Built drive connection")
 
     @property
     def sheet_service(self) -> Resource:
@@ -65,6 +68,19 @@ class Creds:
         """
         if self.sht_srvc:
             return self.sld_srvc
+        else:
+            raise RuntimeError("Must run set_credentials before executing method")
+
+    @property
+    def drive_service(self) -> Resource:
+        """Returns the connects to the drive API
+
+        :raises RuntimeError: Must run set_credentials before executing method
+        :return: API connection
+        :rtype: :class:`googleapiclient.discovery.Resource`
+        """
+        if self.drv_srvc:
+            return self.drv_srvc
         else:
             raise RuntimeError("Must run set_credentials before executing method")
 
