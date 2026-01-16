@@ -42,35 +42,36 @@ class Image:
         file_id: Optional[str] = None
     ) -> None:
         import uuid
-        image_id = f"image_{uuid.uuid4().hex}"
-        requests = [{
-            "createImage": {
-                "objectId": image_id,
-                "url": image_url,
-                "elementProperties": {
-                    "pageObjectId": slide_id,
-                    "size": {
-                        "height": {"magnitude": height, "unit": "PT"},
-                        "width": {"magnitude": width, "unit": "PT"}
-                    },
-                    "transform": {
-                        "scaleX": 1,
-                        "scaleY": 1,
-                        "translateX": left,
-                        "translateY": top,
-                        "unit": "PT"
+        # Always attempt to delete the file from Drive, even if an error occurs
+        try:
+            image_id = f"image_{uuid.uuid4().hex}"
+            requests = [{
+                "createImage": {
+                    "objectId": image_id,
+                    "url": image_url,
+                    "elementProperties": {
+                        "pageObjectId": slide_id,
+                        "size": {
+                            "height": {"magnitude": height, "unit": "PT"},
+                            "width": {"magnitude": width, "unit": "PT"}
+                        },
+                        "transform": {
+                            "scaleX": 1,
+                            "scaleY": 1,
+                            "translateX": left,
+                            "translateY": top,
+                            "unit": "PT"
+                        }
                     }
                 }
-            }
-        }]
-        self.slide_service.presentations().batchUpdate(
-            presentationId=presentation_id,
-            body={"requests": requests}
-        ).execute()
-        # Delete the image from Drive after inserting into the slide
-        if file_id:
-            try:
-                self.drive_service.files().delete(fileId=file_id).execute()
-            except Exception as e:
-                # Optionally log or handle the error
-                pass
+            }]
+            self.slide_service.presentations().batchUpdate(
+                presentationId=presentation_id,
+                body={"requests": requests}
+            ).execute()
+        finally:
+            if file_id:
+                try:
+                    self.drive_service.files().delete(fileId=file_id).execute()
+                except Exception:
+                    pass
