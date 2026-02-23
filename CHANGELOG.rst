@@ -1,3 +1,9 @@
+v0.2.1 (Unreleased)
+------------
+
+- Add ``copy_slide()`` method to Presentation class for duplicating slides
+- Enhanced slide manipulation capabilities with insertion index control
+
 v0.1.1
 ------------
 

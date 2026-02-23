@@ -278,6 +278,42 @@ class TestPresentation:
         self.object.rm_slide(slide_id=3333)
         assert self.object.sl_ids == [1111, 2222]
 
+    def test_copy_slide_default_position(self, monkeypatch):
+        def mock_service(self):
+            return MockService()
+
+        monkeypatch.setattr(
+            "gslides.config.Creds.slide_service", property(mock_service)
+        )
+
+        def mock_return(self):
+            return {
+                "replies": [{"duplicateObject": {"objectId": "4444"}}]
+            }
+
+        monkeypatch.setattr(MockService, "execute", mock_return)
+        new_slide_id = self.object.copy_slide(slide_id=1111)
+        assert new_slide_id == "4444"
+        assert self.object.sl_ids == [1111, "4444", 2222, 3333]
+
+    def test_copy_slide_with_insertion_index(self, monkeypatch):
+        def mock_service(self):
+            return MockService()
+
+        monkeypatch.setattr(
+            "gslides.config.Creds.slide_service", property(mock_service)
+        )
+
+        def mock_return(self):
+            return {
+                "replies": [{"duplicateObject": {"objectId": "5555"}}]
+            }
+
+        monkeypatch.setattr(MockService, "execute", mock_return)
+        new_slide_id = self.object.copy_slide(slide_id=2222, insertion_index=0)
+        assert new_slide_id == "5555"
+        assert self.object.sl_ids == ["5555", 1111, 2222, 3333]
+
     def test_template(self, monkeypatch):
         def mock_service(self):
             return MockService()

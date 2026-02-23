@@ -680,6 +680,49 @@ class Presentation:
         logger.info("Slide successfully deleted")
         self.sl_ids.remove(slide_id)
 
+    def copy_slide(
+        self, slide_id: str, insertion_index: Optional[int] = None
+    ) -> str:
+        """Creates an exact copy of a slide within the presentation.
+
+        :param slide_id: The slide_id of the slide to duplicate
+        :type slide_id: str
+        :param insertion_index: The slide index to insert the copied slide.
+            If not provided, the slide will be inserted immediately after the original
+        :type insertion_index: int, optional
+        :return: The slide_id of the newly created slide
+        :rtype: str
+        """
+        service: Any = creds.slide_service
+        logger.info(f"Copying slide {slide_id}")
+
+        request = {"duplicateObject": {"objectId": slide_id}}
+
+        if insertion_index is not None:
+            request["duplicateObject"]["insertionIndex"] = insertion_index
+
+        response = service.presentations().batchUpdate(
+            presentationId=self.presentation_id,
+            body={"requests": [request]},
+        ).execute()
+
+        new_slide_id = response["replies"][0]["duplicateObject"]["objectId"]
+        logger.info(f"Slide successfully copied with id {new_slide_id}")
+
+        if insertion_index is None:
+            # Insert after the original slide
+            original_index = self.sl_ids.index(slide_id)
+            self.sl_ids.insert(original_index + 1, new_slide_id)
+        else:
+            self.sl_ids.insert(insertion_index, new_slide_id)
+
+        # Update chart_ids if the slide contained charts
+        charts = json_chunk_key_extract(response, "sheetsChart")
+        for chart in charts:
+            self.ch_ids[chart["objectId"]] = chart["title"]
+
+        return new_slide_id
+
     def template(self, mapping: dict, slide_ids: list = []) -> None:
         """Replaces all text encaspulated with `{{ <TEXT> }}` with input.
 
