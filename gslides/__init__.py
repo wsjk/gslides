@@ -50,3 +50,18 @@ from .frame import Frame  # noqa
 from .presentation import Presentation  # noqa
 from .spreadsheet import Spreadsheet  # noqa
 from .table import Table  # noqa
+
+__all__ = [
+    "Chart",
+    "Series",
+    "Palette",
+    "Frame",
+    "Presentation",
+    "Spreadsheet",
+    "Table",
+    "initialize_credentials",
+    "set_font",
+    "set_palette",
+    "CHART_PARAMS",
+]
+
