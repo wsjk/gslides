@@ -1,4 +1,4 @@
-v0.2.1 (Unreleased)
+v0.2.0
 ------------
 
 - Add ``copy_slide()`` method to Presentation class for duplicating slides
