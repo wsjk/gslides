@@ -696,19 +696,34 @@ class Presentation:
         service: Any = creds.slide_service
         logger.info(f"Copying slide {slide_id}")
 
-        request = {"duplicateObject": {"objectId": slide_id}}
-
-        if insertion_index is not None:
-            request["duplicateObject"]["insertionIndex"] = insertion_index
+        # Step 1: Duplicate the slide
+        duplicate_request = {"duplicateObject": {"objectId": slide_id}}
 
         response = service.presentations().batchUpdate(
             presentationId=self.presentation_id,
-            body={"requests": [request]},
+            body={"requests": [duplicate_request]},
         ).execute()
 
         new_slide_id = response["replies"][0]["duplicateObject"]["objectId"]
-        logger.info(f"Slide successfully copied with id {new_slide_id}")
 
+        # Step 2: Move to desired position if insertion_index is specified
+        if insertion_index is not None:
+            # Update the slide position using updateSlidesPosition
+            move_request = {
+                "updateSlidesPosition": {
+                    "slideObjectIds": [new_slide_id],
+                    "insertionIndex": insertion_index
+                }
+            }
+            service.presentations().batchUpdate(
+                presentationId=self.presentation_id,
+                body={"requests": [move_request]},
+            ).execute()
+            logger.info(f"Slide successfully copied and moved to index {insertion_index}")
+        else:
+            logger.info(f"Slide successfully copied with id {new_slide_id}")
+
+        # Update internal slide_ids list
         if insertion_index is None:
             # Insert after the original slide
             original_index = self.sl_ids.index(slide_id)
